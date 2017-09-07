@@ -36,12 +36,13 @@ public class ReportServiceImpl implements ReportService {
 	@Value("${ws.pricing.valid.type}")
 	private String validQbType;
 	
+	final private Set<String> vendorSet = new HashSet<>();
+	final private List<CostReportSummary> reportList = new ArrayList<>();
+	
 	@Override
 	public void generateReport(String file, String environment) {
 		final List<Address> addressList = this.fileService.getAddressList(file);
 		final List<ServiceRequest> serviceList = this.fileService.getService(file);
-		final List<CostReportSummary> reportList = new ArrayList<>();
-		final Set<String> vendorSet = new HashSet<>();
 		
 		for (final Address address : addressList) {
 			logger.info("using address: " + address);
@@ -52,19 +53,21 @@ public class ReportServiceImpl implements ReportService {
 			for (final ServiceRequest service : serviceReqList) {
 				logger.info("with service: " + service);
 				final List<Cost> costList = this.pricingService.getPrice(address, service, environment);
-				vendorSet.addAll(this.getVendorSet(costList));
-				reportList.add(this.summarizeCost(costList, address, service));
+				this.vendorSet.addAll(costList.parallelStream()
+						   					  .map(cost -> cost.getProvider())
+						   					  .sorted()
+						   					  .collect(Collectors.toSet()));
+				this.reportList.add(this.summarizeCost(costList, address, service));
 			}
 		}
 		
-		this.exportReport(reportList, vendorSet);
+		this.exportReport();
 	}
 	
-	@Override
-	public void exportReport(List<CostReportSummary> reportList, Set<String> vendorSet) {
+	private void exportReport() {
 		logger.info("exporting report...");
-		vendorSet.forEach(System.out::println);
-		reportList.forEach(System.out::println);
+		this.vendorSet.forEach(System.out::println);
+		this.reportList.forEach(System.out::println);
 	}
 	
 	private CostReportSummary summarizeCost(List<Cost> costList, Address address, ServiceRequest service) {
@@ -79,12 +82,6 @@ public class ReportServiceImpl implements ReportService {
 		report.setResultSummaryMap(tally);
 		
 		return report;
-	}
-	
-	private Set<String> getVendorSet(List<Cost> costList) {
-		return costList.parallelStream()
-					   .map(cost -> cost.getProvider())
-					   .collect(Collectors.toSet());
 	}
 
 }

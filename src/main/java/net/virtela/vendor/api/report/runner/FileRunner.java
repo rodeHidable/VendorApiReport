@@ -80,6 +80,7 @@ public class FileRunner implements CommandLineRunner {
 			} else {
 				logger.error("File not found!");
 			}
+			
 		} catch (UnrecognizedOptionException | MissingArgumentException e) {
 			formatter.printHelp(Constants.EMPTY_STRING, options);
 			System.exit(1);
