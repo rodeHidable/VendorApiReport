@@ -26,6 +26,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import net.virtela.vendor.api.report.export.ApiReportExporter;
 import net.virtela.vendor.api.report.model.Address;
 import net.virtela.vendor.api.report.model.Cost;
 import net.virtela.vendor.api.report.model.CostReportSummary;
@@ -51,6 +52,9 @@ public class ReportToolRunner implements CommandLineRunner {
 	
 	@Autowired
 	private PricingService pricingService;
+	
+	@Autowired
+	private ApiReportExporter reportExporter;
 	
 	@Value("${ws.pricing.valid.type}")
 	private String validQbType;
@@ -163,6 +167,8 @@ public class ReportToolRunner implements CommandLineRunner {
 		logger.debug("exporting report...");
 		this.vendorSet.forEach(System.out::println);
 		this.reportList.forEach(System.out::println);
+		
+//		this.reportExporter.populateContent(this.reportList, this.vendorSet);
 	}
 	
 	private CostReportSummary summarizeCost(List<Cost> costList, Address address, ServiceRequest service) {
