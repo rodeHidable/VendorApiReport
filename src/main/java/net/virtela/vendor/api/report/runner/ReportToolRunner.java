@@ -24,7 +24,7 @@ import net.virtela.vendor.api.report.util.Constants;
 
 @Component
 @Order(1)
-public class FileRunner implements CommandLineRunner {
+public class ReportToolRunner implements CommandLineRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
