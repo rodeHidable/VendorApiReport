@@ -30,7 +30,7 @@ public class PricingServiceImpl implements PricingService {
 	
 	@Override
 	public List<Cost> getPrice(Address address, ServiceRequest service, String env) {
-		logger.info("sending request to ws...");
+		logger.debug("sending request to ws...");
 		final List<Cost> costList = new ArrayList<>();
 		if (address != null && service != null) {
 			final LocationParam locationParam = LocationParam.toLocationParam(address);
@@ -56,7 +56,7 @@ public class PricingServiceImpl implements PricingService {
 			try {
 				final String response = this.ws.getPrice( PricingParam.toJson(pricingParam), env);
 				costList.addAll(CommonHelper.toList(response, Cost.class));
-			} catch (JsonProcessingException e) {
+			} catch (final JsonProcessingException e) {
 				logger.error("Error on getting price from web service. " + e.getMessage());
 			}
 		}

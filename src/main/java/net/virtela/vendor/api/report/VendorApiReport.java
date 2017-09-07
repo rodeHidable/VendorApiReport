@@ -1,5 +1,6 @@
 package net.virtela.vendor.api.report;
 
+import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,13 +12,15 @@ import org.springframework.web.client.RestTemplate;
 public class VendorApiReport {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VendorApiReport.class, args);
+		final SpringApplication app = new SpringApplication(VendorApiReport.class);
+		app.setBannerMode(Banner.Mode.OFF);
+		app.run(args);
 	}
 	
 	@Bean
 	CommandLineRunner runner() {
 		return args -> {
-			System.out.println("CommandLineRunner running in the VendorApiTesterApplication.");
+			System.out.println("CommandLineRunner running...");
 		};
 	}
 	

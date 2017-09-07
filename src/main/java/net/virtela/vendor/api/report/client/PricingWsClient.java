@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class PricingWsClient {
 	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -40,7 +40,7 @@ public class PricingWsClient {
 		final HttpEntity<String> request = new HttpEntity<>(param, headers);
 		
 		
-		logger.info("calling pricing web service using this param: " + param + " and this env: " + endpoint);
+		logger.debug("calling pricing web service using this param: " + param + " and this env: " + endpoint);
 		final ResponseEntity<String> response = this.restTemplate.exchange(endpoint, HttpMethod.POST, request, String.class);
 		return response.getBody();
 	}
