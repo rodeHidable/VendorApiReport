@@ -115,6 +115,8 @@ public class ReportToolRunner implements CommandLineRunner {
 				final List<Address> addressList = this.fileService.getAddressList(file);
 				final List<ServiceRequest> serviceList = this.fileService.getService(file);
 				
+				final String env = this.validateEnv();
+				
 				for (final Address address : addressList) {
 					this.printToConsole("using address: " + address);
 					final Set<ServiceRequest> serviceReqList = serviceList.parallelStream()
@@ -123,7 +125,7 @@ public class ReportToolRunner implements CommandLineRunner {
 					
 					for (final ServiceRequest service : serviceReqList) {
 						this.printToConsole("with service: " + service);
-						final List<Cost> costList = this.pricingService.getPrice(address, service, this.validateEnv());
+						final List<Cost> costList = this.pricingService.getPrice(address, service, env);
 						this.vendorSet.addAll(costList.parallelStream()
 								   					  .map(cost -> cost.getProvider())
 								   					  .sorted()
@@ -170,7 +172,9 @@ public class ReportToolRunner implements CommandLineRunner {
 		for (int i = 0; i < fileArr.length; i++) {
 			if (i == fileArr.length - 1) {
 				final String date = new SimpleDateFormat("MMM-dd-yyyy").format(CommonHelper.getDateToday());
-				reportFile.append("ApiReport" + date + ".xlsx");
+				reportFile.append("ApiReport-");
+				reportFile.append(date);
+				reportFile.append(".xlsx");
 				break;
 			}
 			reportFile.append(fileArr[i]);
@@ -191,6 +195,14 @@ public class ReportToolRunner implements CommandLineRunner {
 		final CostReportSummary report = new CostReportSummary();
 		report.setFullAddress(address.toString());
 		report.setServiceId(service.getId());
+		report.setVirtelaProduct(service.getVirtelaProduct());
+		report.setAccessType(service.getAccessType());
+		report.setLcc(service.getLcc());
+		report.setCircuitSpeed(service.getCircuitSpeed());
+		report.setPortSpeed(service.getPortSpeed());
+		report.setUpSpeed(service.getUploadSpeed());
+		report.setTerm(service.getTerm().toString());
+		report.setExactSpeed(service.getExactSpeed());
 		report.setResultSummaryMap(tally);
 		
 		return report;

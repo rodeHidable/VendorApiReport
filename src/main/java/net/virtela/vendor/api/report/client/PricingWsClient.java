@@ -8,10 +8,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import net.virtela.vendor.api.report.util.Constants;
 
 @Component
 public class PricingWsClient {
@@ -42,7 +45,11 @@ public class PricingWsClient {
 		
 		logger.debug("calling pricing web service using this param: " + param + " and this env: " + endpoint);
 		final ResponseEntity<String> response = this.restTemplate.exchange(endpoint, HttpMethod.POST, request, String.class);
-		return response.getBody();
+		if (response.getStatusCode() == HttpStatus.OK) {
+			return response.getBody();
+		}
+		
+		return Constants.EMPTY_STRING;
 	}
 	
 	private String getDomain(String env) {

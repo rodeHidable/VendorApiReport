@@ -2,13 +2,15 @@ package net.virtela.vendor.api.report.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Cell;
+
 import net.virtela.vendor.api.report.model.Address;
+import net.virtela.vendor.api.report.util.CommonHelper;
 import net.virtela.vendor.api.report.util.Constants;
 
 public class AddressParser extends BaseExcelParser {
@@ -28,16 +30,32 @@ public class AddressParser extends BaseExcelParser {
 	private static final String SHEET_ADDRESS = "Address";
 	
 	private static final List<String> FIELD_LIST = new ArrayList<>(Arrays.asList(HEADER_SERVICE_REQUEST, HEADER_COUNTRY, HEADER_STATE, HEADER_ZIPCODE, HEADER_CITY, HEADER_STREET, HEADER_SECONDARY_STREET, HEADER_LONGITUDE, HEADER_LATITUDE));
-	private Map<String, Integer> cellMapper;
+	private final Map<String, Integer> cellMapper;
 	
 	public  AddressParser(InputStream input) {
 		super(input, XLSX_FORMAT);
 		this.cellMapper = this.initializeCelMapper(FIELD_LIST, ROW_INDEX_HEADER);
 		try {
 			input.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public Object getCellValue(Cell cell) {
+
+		if (cell != null) {
+			switch (cell.getCellType()) {
+			case Cell.CELL_TYPE_STRING:
+				return cell.getRichStringCellValue().getString().trim();
+			case Cell.CELL_TYPE_NUMERIC:
+				return Double.valueOf(cell.getNumericCellValue());
+			case Cell.CELL_TYPE_BOOLEAN:
+				return Boolean.valueOf(cell.getBooleanCellValue());
+			}
+		}
+		return "";
 	}
 	
 	@Override
@@ -65,15 +83,15 @@ public class AddressParser extends BaseExcelParser {
 	
 	private void processRecords(List<Object> rowItem, Address address) {
 		int columnIndex = 0;
-		for (Object columns : rowItem) {
-			Integer columnIndexInteger = Integer.valueOf(columnIndex++);
+		for (final Object columns : rowItem) {
+			final Integer columnIndexInteger = Integer.valueOf(columnIndex++);
 			
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_SERVICE_REQUEST))) {
 				final String serviceRequest = (String) columns;
 				final String [] serviceRequestSplit = serviceRequest.split(Constants.COMMA);
 				
 				final List<Integer> serviceRequestList = new ArrayList<>();
-				for (String sRequest : serviceRequestSplit) {
+				for (final String sRequest : serviceRequestSplit) {
 					serviceRequestList.add(Integer.parseInt(sRequest));
 				}
 				
@@ -95,13 +113,13 @@ public class AddressParser extends BaseExcelParser {
 				address.setStreet((String) columns);
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_SECONDARY_STREET))) {
-				address.setSecondaryStreet((String) columns);
+				address.setSecondaryStreet(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_LONGITUDE))) {
-				address.setLongitude(((BigDecimal)columns).doubleValue());
+				address.setLongitude((Double) columns);
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_LATITUDE))) {
-				address.setLatitude(((BigDecimal)columns).doubleValue());
+				address.setLatitude((Double) columns);
 			}
 		}
 	}
