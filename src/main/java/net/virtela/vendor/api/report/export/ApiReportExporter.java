@@ -18,7 +18,6 @@ public class ApiReportExporter extends ExcelExport {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private static final String HEADER_ADDRESS = "ADDRESS";
-	private static final String HEADER_SERVICE_ID = "SERVICE ID";
 	private static final String HEADER_LCC = "LCC";
 	private static final String HEADER_VIRTELA_PRODUCT = "VIRTELA PRODUCT";
 	private static final String HEADER_ACCESS_TYPE = "ACCESS TYPE";
