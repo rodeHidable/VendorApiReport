@@ -6,30 +6,31 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import net.virtela.vendor.api.report.model.CostReportSummary;
 
+@Component
 public class ApiReportExporter extends ExcelExport {
 	
-	private final Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private static final String TEMPLATE_PATH = "src/main/resources/ApiReportTemplate.xlsx";
-	private static final String SHEET_NAME = "Report";
-	
-	private static final String HEADER_ADDRESS = "Address";
-	private static final String HEADER_SERVICE_ID = "Service Id";
+	private static final String HEADER_ADDRESS = "ADDRESS";
+	private static final String HEADER_SERVICE_ID = "SERVICE ID";
 	
 	public ApiReportExporter() {
-		super(TEMPLATE_PATH, SHEET_NAME);
+		super();
 	}
 	
-	public ApiReportExporter(String tempaltePath, String sheetName) {
-		super(tempaltePath, sheetName);
+	public ApiReportExporter(String templatePath, String sheetName) {
+		super(templatePath, sheetName);
 	}
 	
 	public <T> void populateContent(List<T> dataList, Set<String> vendorList) {
 		logger.debug("preparing to export file...");
-		this.setCellValue(HEADER_ADDRESS, 0, 1);
+
+		this.setCellValue(HEADER_ADDRESS, 0, 0);
 		this.setCellValue(HEADER_SERVICE_ID, 0, 1);
 		
 		// set header per vendor
@@ -63,6 +64,7 @@ public class ApiReportExporter extends ExcelExport {
 		}
 		
 		this.autoSizeCol(this.getSheet(), 0, colIndex +1);
+		
 	}
 	
 	private int getHeaderIndex(String vendor, Set<String> vendorList) {

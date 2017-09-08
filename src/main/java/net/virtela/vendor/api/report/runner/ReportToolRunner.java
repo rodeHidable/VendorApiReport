@@ -53,9 +53,6 @@ public class ReportToolRunner implements CommandLineRunner {
 	@Autowired
 	private PricingService pricingService;
 	
-	@Autowired
-	private ApiReportExporter reportExporter;
-	
 	@Value("${ws.pricing.valid.type}")
 	private String validQbType;
 	
@@ -135,7 +132,7 @@ public class ReportToolRunner implements CommandLineRunner {
 					}
 				}
 				
-				this.exportReport();
+				this.exportReport(file);
 			} else {
 				this.printToConsole("File not found.");
 			}
@@ -163,12 +160,24 @@ public class ReportToolRunner implements CommandLineRunner {
 		}
 	}
 	
-	private void exportReport() {
+	private void exportReport(String filePath) {
 		logger.debug("exporting report...");
-		this.vendorSet.forEach(System.out::println);
-		this.reportList.forEach(System.out::println);
+		final StringBuilder reportFile = new StringBuilder();
 		
-//		this.reportExporter.populateContent(this.reportList, this.vendorSet);
+		final String [] fileArr = filePath.split(Constants.SLASH);
+		for (int i = 0; i < fileArr.length; i++) {
+			reportFile.append(fileArr[i]);
+			reportFile.append(Constants.SLASH);
+			
+			if (i == fileArr.length - 1) {
+				reportFile.append("ApiReport-" + CommonHelper.getTodayTimestamp() + ".xlsx");
+				break;
+			}
+		}
+		
+		final ApiReportExporter reportExporter = new ApiReportExporter();
+		reportExporter.populateContent(this.reportList, this.vendorSet);
+		reportExporter.saveWorkbook(reportFile.toString());
 	}
 	
 	private CostReportSummary summarizeCost(List<Cost> costList, Address address, ServiceRequest service) {

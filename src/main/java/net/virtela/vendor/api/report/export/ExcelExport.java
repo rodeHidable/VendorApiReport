@@ -2,6 +2,7 @@ package net.virtela.vendor.api.report.export;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -27,6 +28,11 @@ public class ExcelExport {
 	private CellStyle cellStyleRequired;
 	private CellStyle cellStyleNormal;
 	private CellStyle cellStyleWarning;
+	
+	public ExcelExport() {
+		this.workbook = new XSSFWorkbook(); 
+		this.sheet = workbook.createSheet("Report");
+	}
 
 	public ExcelExport(String tempaltePath, String sheetName) {
 		try {
@@ -158,6 +164,14 @@ public class ExcelExport {
 	public void autoSizeCol(Sheet sheet, final int startCol, final int endCol) {
 		for (int colIndex = startCol; colIndex < endCol; colIndex++) {
 			sheet.autoSizeColumn(colIndex, true);
+		}
+	}
+	
+	public void saveWorkbook(String savePath) {
+		try (final FileOutputStream fileOut = new FileOutputStream(savePath)) {
+			this.workbook.write(fileOut);
+		} catch (final IOException e) {
+			e.printStackTrace();
 		}
 	}
 
