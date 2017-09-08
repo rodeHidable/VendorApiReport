@@ -28,8 +28,8 @@ public class FileParserServiceImpl implements FileParserService {
 	
 	@Override
 	public File openFile(String path) throws FileNotFoundException {
-		logger.info("opening file from " + path);
-		File file = new File(path);
+		logger.debug("opening file from " + path);
+		final File file = new File(path);
 		if (file.exists()) {
 			return file;
 		}
@@ -38,28 +38,28 @@ public class FileParserServiceImpl implements FileParserService {
 
 	@Override
 	public void printFileContent(File file) throws Exception {
-		logger.info("reading " + file.getName() + " content...");
+		logger.debug("reading " + file.getName() + " content...");
 		try (InputStream in = Files.newInputStream(file.toPath())) {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				System.out.println(line);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error(e.getMessage());
 		}
 	}
 
 	@Override
 	public List<Address> getAddressList(String filePath) {
-		logger.info("Parsing excel file for list of Address...");
+		logger.debug("Parsing excel file for list of Address...");
 		final List<Address> addressList = new ArrayList<>();
 		try {
 			final File template = this.openFile(filePath);
 			final InputStream fileStream = new FileInputStream(template);
 			final AddressParser addressParser = new AddressParser(fileStream);
 			addressList.addAll(addressParser.getParsedList());
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			logger.error(e.getMessage());
 		}
 		return addressList;
@@ -67,14 +67,14 @@ public class FileParserServiceImpl implements FileParserService {
 
 	@Override
 	public List<ServiceRequest> getService(String filePath) {
-		logger.info("Parsing template for list of Service Request...");
+		logger.debug("Parsing template for list of Service Request...");
 		final List<ServiceRequest> serviceRequestList = new ArrayList<>();
 		try {
 			final File template = this.openFile(filePath);
 			final InputStream fileStream = new FileInputStream(template);
 			final ServiceRequestParser serviceRequestParser = new ServiceRequestParser(fileStream);
 			serviceRequestList.addAll(serviceRequestParser.getParsedList());
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			logger.error(e.getMessage());
 		}
 		return serviceRequestList;

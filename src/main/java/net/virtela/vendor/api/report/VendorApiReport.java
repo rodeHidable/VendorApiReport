@@ -17,7 +17,7 @@ public class VendorApiReport {
 	@Bean
 	CommandLineRunner runner() {
 		return args -> {
-			System.out.println("CommandLineRunner running in the VendorApiTesterApplication.");
+			System.out.println("Process complete.");
 		};
 	}
 	
