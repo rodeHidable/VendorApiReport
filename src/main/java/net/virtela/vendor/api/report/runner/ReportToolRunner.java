@@ -1,5 +1,6 @@
 package net.virtela.vendor.api.report.runner;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -163,16 +164,17 @@ public class ReportToolRunner implements CommandLineRunner {
 	private void exportReport(String filePath) {
 		logger.debug("exporting report...");
 		final StringBuilder reportFile = new StringBuilder();
+		filePath = filePath.replace(Constants.BACK_SLASH, Constants.SLASH);
 		
 		final String [] fileArr = filePath.split(Constants.SLASH);
 		for (int i = 0; i < fileArr.length; i++) {
-			reportFile.append(fileArr[i]);
-			reportFile.append(Constants.SLASH);
-			
 			if (i == fileArr.length - 1) {
-				reportFile.append("ApiReport-" + CommonHelper.getTodayTimestamp() + ".xlsx");
+				final String date = new SimpleDateFormat("MMM-dd-yyyy").format(CommonHelper.getDateToday());
+				reportFile.append("ApiReport" + date + ".xlsx");
 				break;
 			}
+			reportFile.append(fileArr[i]);
+			reportFile.append(Constants.SLASH);
 		}
 		
 		final ApiReportExporter reportExporter = new ApiReportExporter();
