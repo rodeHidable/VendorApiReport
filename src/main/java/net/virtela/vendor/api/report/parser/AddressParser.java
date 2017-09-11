@@ -87,7 +87,7 @@ public class AddressParser extends BaseExcelParser {
 			final Integer columnIndexInteger = Integer.valueOf(columnIndex++);
 			
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_SERVICE_REQUEST))) {
-				final String serviceRequest = (String) columns;
+				final String serviceRequest = CommonHelper.getStringValue(columns);
 				final String [] serviceRequestSplit = serviceRequest.split(Constants.COMMA);
 				
 				final List<Integer> serviceRequestList = new ArrayList<>();
@@ -98,28 +98,28 @@ public class AddressParser extends BaseExcelParser {
 				address.setServerSetList(serviceRequestList);
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_COUNTRY))) {
-				address.setCountry((String) columns);
+				address.setCountry(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_STATE))) {
-				address.setState((String) columns);
+				address.setState(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_ZIPCODE))) {
-				address.setZipCode((String) columns);
+				address.setZipCode(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_CITY))) {
-				address.setCity((String) columns);
+				address.setCity(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_STREET))) {
-				address.setStreet((String) columns);
+				address.setStreet(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_SECONDARY_STREET))) {
 				address.setSecondaryStreet(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_LONGITUDE))) {
-				address.setLongitude((Double) columns);
+				address.setLongitude(CommonHelper.toDecimalNumber(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_LATITUDE))) {
-				address.setLatitude((Double) columns);
+				address.setLatitude(CommonHelper.toDecimalNumber(columns));
 			}
 		}
 	}

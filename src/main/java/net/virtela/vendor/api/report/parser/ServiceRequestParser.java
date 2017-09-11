@@ -2,13 +2,13 @@ package net.virtela.vendor.api.report.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import net.virtela.vendor.api.report.model.ServiceRequest;
+import net.virtela.vendor.api.report.util.CommonHelper;
 
 public class ServiceRequestParser extends BaseExcelParser {
 
@@ -27,7 +27,7 @@ public class ServiceRequestParser extends BaseExcelParser {
 	private static final String SHEET_REQUEST_SERVICE = "RequestService";
 	
 	private static final List<String> FIELD_LIST = new ArrayList<>(Arrays.asList(HEADER_ID, HEADER_VIRTELA_PRODUCT, HEADER_ACCESS_TYPE, HEADER_LCC, HEADER_CIRCUIT_SPEED, HEADER_PORT_SPEED, HEADER_UPLOAD_SPEED, HEADER_TERM, HEADER_EXACT_SPEED));
-	private Map<String, Integer> cellMapper;
+	private final Map<String, Integer> cellMapper;
 	
 	public ServiceRequestParser(InputStream input) {
 		super(input, XLSX_FORMAT);
@@ -68,36 +68,31 @@ public class ServiceRequestParser extends BaseExcelParser {
 			Integer columnIndexInteger = Integer.valueOf(columnIndex++);
 			
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_ID))) {
-				final BigDecimal id = (BigDecimal) columns;
-				serviceRequest.setId(id.intValue());
+				serviceRequest.setId(CommonHelper.toInteger(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_VIRTELA_PRODUCT))) {
-				serviceRequest.setVirtelaProduct((String) columns);
+				serviceRequest.setVirtelaProduct(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_ACCESS_TYPE))) {
-				serviceRequest.setAccessType((String) columns);
+				serviceRequest.setAccessType(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_LCC))) {
-				serviceRequest.setLcc((String) columns);
+				serviceRequest.setLcc(CommonHelper.getStringValue(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_CIRCUIT_SPEED))) {
-				final BigDecimal circuitSpeed = (BigDecimal) columns;
-				serviceRequest.setCircuitSpeed(circuitSpeed.longValue());
+				serviceRequest.setCircuitSpeed(CommonHelper.toNumber(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_PORT_SPEED))) {
-				final BigDecimal portSpeed = (BigDecimal) columns;
-				serviceRequest.setPortSpeed(portSpeed.longValue());
+				serviceRequest.setPortSpeed(CommonHelper.toNumber(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_UPLOAD_SPEED))) {
-				final BigDecimal upSpeed = (BigDecimal) columns;
-				serviceRequest.setUploadSpeed(upSpeed.longValue());
+				serviceRequest.setUploadSpeed(CommonHelper.toNumber(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_TERM))) {
-				final BigDecimal term = (BigDecimal) columns;
-				serviceRequest.setTerm(term.intValue());
+				serviceRequest.setTerm(CommonHelper.toInteger(columns));
 			}
 			if(columnIndexInteger.equals(this.cellMapper.get(HEADER_EXACT_SPEED))) {
-				serviceRequest.setExactSpeed((String) columns);
+				serviceRequest.setExactSpeed(CommonHelper.getStringValue(columns));
 			}
 		}
 	}
