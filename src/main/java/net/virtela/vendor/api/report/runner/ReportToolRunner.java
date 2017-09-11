@@ -67,14 +67,14 @@ public class ReportToolRunner implements CommandLineRunner {
 	@Value("${server.env.default}")
 	private String defaultServerEnv;
 	
-	@Value("${cmd.option.file}")
+	@Value("${cmd.option.path}")
 	private String cmdOptionFile;
 	
 	@Value("${cmd.option.env}")
 	private String cmdOptionEnv;
 	
-	@Value("${cmd.option.no.cache}")
-	private String cmdNoCache;
+	@Value("${cmd.option.cache}")
+	private String cmdUseCache;
 	
 	private AtomicInteger totalWork;
 	private AtomicInteger progres;
@@ -91,11 +91,11 @@ public class ReportToolRunner implements CommandLineRunner {
 		this.appConf = new AppConfig();
 
 		// File Option
-		final Option fileOption = Option.builder(this.cmdOptionFile)
-										.argName("file")
+		final Option filePathOption = Option.builder(this.cmdOptionFile)
+										.argName("path")
 										.hasArg()
 										.required(true)
-										.desc("File to process")
+										.desc("file path")
 										.build();
 		
 		// Environment Option
@@ -103,19 +103,19 @@ public class ReportToolRunner implements CommandLineRunner {
 									   .argName("environment")
 							           .hasArg()
 							           .required(false)
-							           .desc("Environment to execute")
+							           .desc("server environment: (tst, sbx, prod)")
 							           .build();
 		
 		// Show Details Option
-		final Option noCacheOption = Option.builder(this.cmdNoCache)
-									   	 .argName("No Cache")
+		final Option useCacheOption = Option.builder(this.cmdUseCache)
+									   	 .argName("cache")
 									   	 .required(false)
-									   	 .desc("Skip Cache for API Queries,")
+									   	 .desc("api queries will get from cache")
 									   	 .build();
 
-		options.addOption(fileOption);
+		options.addOption(filePathOption);
 		options.addOption(envOption);
-		options.addOption(noCacheOption);
+		options.addOption(useCacheOption);
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class ReportToolRunner implements CommandLineRunner {
 																		  .collect(Collectors.toSet());
 					
 					for (final ServiceRequest service : serviceReqList) {
-						final List<Cost> costList = this.pricingService.getPrice(address, service, this.appConf.getEnvironment()); 
+						final List<Cost> costList = this.pricingService.getPrice(address, service, this.appConf.getEnvironment(), this.appConf.getSkipCache()); 
 						this.vendorSet.addAll(costList.parallelStream()
 								   					  .map(cost -> cost.getProvider())
 								   					  .sorted()
@@ -206,7 +206,7 @@ public class ReportToolRunner implements CommandLineRunner {
 				this.appConf.setEnvironment(this.defaultServerEnv);
 			}
 			
-			if (this.cmd.hasOption(this.cmdNoCache)) {
+			if (this.cmd.hasOption(this.cmdUseCache)) {
 				this.appConf.setSkipCache(false);
 			} else {
 				this.appConf.setSkipCache(true);

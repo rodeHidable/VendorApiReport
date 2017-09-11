@@ -29,7 +29,7 @@ public class PricingServiceImpl implements PricingService {
 	private PricingWsClient ws;
 	
 	@Override
-	public List<Cost> getPrice(Address address, ServiceRequest service, String env) {
+	public List<Cost> getPrice(Address address, ServiceRequest service, String env, boolean skipCache) {
 		logger.debug("sending request to ws...");
 		final List<Cost> costList = new ArrayList<>();
 		if (address != null && service != null) {
@@ -46,7 +46,7 @@ public class PricingServiceImpl implements PricingService {
 			pricingParam.setLcc(service.getLcc());
 			pricingParam.setLocationParam(locationParam);
 			pricingParam.setPortSpeed(service.getPortSpeed().toString());
-			pricingParam.setSkipCache(Constants.BOOLEAN_STR_TRUE);
+			pricingParam.setSkipCache(skipCache ? Constants.BOOLEAN_STR_TRUE : Constants.BOOLEAN_STR_FALSE);
 			pricingParam.setTerm(service.getTerm().toString());
 			pricingParam.setUpSpeed(service.getUploadSpeed());
 			pricingParam.setVendorAPI(Constants.BOOLEAN_STR_TRUE);
