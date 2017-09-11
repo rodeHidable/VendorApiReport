@@ -8,5 +8,5 @@ import net.virtela.vendor.api.report.model.ServiceRequest;
 
 public interface PricingService {
 
-	public List<Cost> getPrice(Address address, ServiceRequest service, String env);
+	public List<Cost> getPrice(Address address, ServiceRequest service, String env, boolean skipCache);
 }
