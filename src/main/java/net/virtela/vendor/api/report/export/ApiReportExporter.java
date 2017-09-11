@@ -77,18 +77,24 @@ public class ApiReportExporter extends ExcelExport {
 			this.setCellValue(summary.getTerm(), row, colIndex++, this.getCellStyleNormal());
 			this.setCellValue(CommonHelper.isBooleanFlagActive(summary.getExactSpeed()) ? "YES" : "NO", row, colIndex++, this.getCellStyleNormal());
 			
-			summary.getResultSummaryMap().forEach((vendor, tally) -> {
-				int index = 9;
-				for (final String vendorHeader : vendorList) {
-					if (vendorHeader.equals(vendor)) {
-						this.setCellValue(tally, row, index, this.getCellStyleNormal());
-					} else {
-						this.setCellValue(0, row, index, this.getCellStyleNormal());
+			if (summary.getResultSummaryMap() != null && !summary.getResultSummaryMap().isEmpty()) {
+				summary.getResultSummaryMap().forEach((vendor, tally) -> {
+					int index = 9;
+					for (final String vendorHeader : vendorList) {
+						if (vendorHeader.equals(vendor)) {
+							this.setCellValue(tally, row, index, this.getCellStyleNormal());
+						} else {
+							this.setCellValue(0, row, index, this.getCellStyleNormal());
+						}
+						
+						index++;
 					}
-					
-					index++;
+				});
+			} else {
+				for (@SuppressWarnings("unused") final String vendorHeader : vendorList) {
+					this.setCellValue(0, row, colIndex++, this.getCellStyleNormal());
 				}
-			});
+			}
 			
 			rowIndex++;
 		}

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -108,7 +107,7 @@ public class ReportToolRunner implements CommandLineRunner {
 							           .build();
 		
 		// Show Details Option
-		final Option printOption = Option.builder(this.cmdNoCache)
+		final Option noCacheOption = Option.builder(this.cmdNoCache)
 									   	 .argName("No Cache")
 									   	 .required(false)
 									   	 .desc("Skip Cache for API Queries,")
@@ -116,7 +115,7 @@ public class ReportToolRunner implements CommandLineRunner {
 
 		options.addOption(fileOption);
 		options.addOption(envOption);
-		options.addOption(printOption);
+		options.addOption(noCacheOption);
 	}
 
 	@Override
@@ -130,9 +129,7 @@ public class ReportToolRunner implements CommandLineRunner {
 			final boolean hasRequiredFields = this.initializeConfig();
 			
 			if (hasRequiredFields) {
-				
-				final String env = this.validateEnv(); //TODO: Use AppConfig instead
-				final String file = this.cmd.getOptionValue(this.cmdOptionFile); //TODO: Use AppConfig instead
+				final String file = this.appConf.getTestFilePath(); 
 				
 				final List<Address> addressList = this.fileService.getAddressList(file);
 				final List<ServiceRequest> serviceList = this.fileService.getService(file);
@@ -143,26 +140,27 @@ public class ReportToolRunner implements CommandLineRunner {
 					final Set<ServiceRequest> serviceReqList = serviceList.parallelStream()
 																		  .filter(s -> address.getServerSetList().contains(s.getId()))
 																		  .collect(Collectors.toSet());
+					
 					for (final ServiceRequest service : serviceReqList) {
-//						final List<Cost> costList = this.pricingService.getPrice(address, service, env); //TODO: Use AppConfig
-//						this.vendorSet.addAll(costList.parallelStream()
-//								   					  .map(cost -> cost.getProvider())
-//								   					  .sorted()
-//								   					  .collect(Collectors.toSet()));
+						final List<Cost> costList = this.pricingService.getPrice(address, service, this.appConf.getEnvironment()); 
+						this.vendorSet.addAll(costList.parallelStream()
+								   					  .map(cost -> cost.getProvider())
+								   					  .sorted()
+								   					  .collect(Collectors.toSet()));
 						
-//						this.reportList.add(this.summarizeCost(costList, address, service));
-						TimeUnit.MILLISECONDS.sleep(500); //TODO: Remove This
+						this.reportList.add(this.summarizeCost(costList, address, service));
 						this.progres.incrementAndGet();
 					}
 				}
 				
-				TimeUnit.SECONDS.sleep(2); //TODO: Remove This
-//				this.exportReport(file);
+				final String reportFile = this.exportReport(file);
+				
 				this.progres.incrementAndGet();
 				Thread.sleep(pbRefreshRate);
-				System.out.println("Report has been created in: " ); //TODO: Show where the file is
+				
+				System.out.println("Report has been created in: " + reportFile); 
 			} else {
-				//TODO: Error message: File not found
+				System.out.println("File not found.");
 			}
 		} catch (UnrecognizedOptionException | MissingArgumentException e) {
 			formatter.printHelp(Constants.EMPTY_STRING, options);
@@ -181,16 +179,14 @@ public class ReportToolRunner implements CommandLineRunner {
 		});
 		this.totalWork.addAndGet(1); // Export Progress
 		this.progresBar.setTotal(this.totalWork.get());
-		new Thread(new Runnable() {
-			public void run() {
-				while (progres.get() != totalWork.get()) {
-					try {
-						Thread.sleep(pbRefreshRate);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					progresBar.update(progres.get());
+		new Thread(() -> {
+			while (progres.get() != totalWork.get()) {
+				try {
+					Thread.sleep(pbRefreshRate);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
+				progresBar.update(progres.get());
 			}
 		}).start();
 	}
@@ -215,21 +211,16 @@ public class ReportToolRunner implements CommandLineRunner {
 			} else {
 				this.appConf.setSkipCache(true);
 			}
-			System.out.println(this.appConf);		
+			
+			System.out.println(this.appConf);
+			
 			return true;
 			
 		} 
 		return false;
 	}
 
-	private String validateEnv() {
-		if (this.cmd.hasOption(this.cmdOptionEnv) && !this.cmd.getOptionValue(this.cmdOptionEnv).isEmpty()) {
-			this.defaultServerEnv = this.cmd.getOptionValue(this.cmdOptionEnv);
-		}
-		return this.defaultServerEnv;
-	}
-	
-	private void exportReport(String filePath) {
+	private String exportReport(String filePath) {
 		logger.debug("exporting report...");
 		final StringBuilder reportFile = new StringBuilder();
 		filePath = filePath.replace(Constants.BACK_SLASH, Constants.SLASH);
@@ -250,13 +241,16 @@ public class ReportToolRunner implements CommandLineRunner {
 		final ApiReportExporter reportExporter = new ApiReportExporter();
 		reportExporter.populateContent(this.reportList, this.vendorSet);
 		reportExporter.saveWorkbook(reportFile.toString());
+		
+		return reportFile.toString();
 	}
 	
 	private CostReportSummary summarizeCost(List<Cost> costList, Address address, ServiceRequest service) {
 		final Map<String, Long> tally = costList.parallelStream()
-												.filter(cost -> cost.getQbType().equals(this.validQbType))
-												.map(cost -> cost.getProvider())
+												.filter(cost -> cost.getQbType().equalsIgnoreCase(this.validQbType))
+												.map(Cost::getProvider)
 												.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+		
 		
 		final CostReportSummary report = new CostReportSummary();
 		report.setFullAddress(address.toString());
