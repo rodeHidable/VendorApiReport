@@ -76,6 +76,9 @@ public class ReportToolRunner implements CommandLineRunner {
 	@Value("${cmd.option.cache}")
 	private String cmdUseCache;
 	
+	@Value("${cmd.option.help}")
+	private String cmdHelp;
+	
 	private AtomicInteger totalWork;
 	private AtomicInteger progres;
 	private CliProgressBar progresBar;
@@ -92,30 +95,35 @@ public class ReportToolRunner implements CommandLineRunner {
 
 		// File Option
 		final Option filePathOption = Option.builder(this.cmdOptionFile)
-										.argName("path")
-										.hasArg()
-										.required(true)
-										.desc("file path")
-										.build();
+											.argName("path")
+											.longOpt("path")
+											.hasArg()
+											.desc("file path")
+											.build();
 		
 		// Environment Option
 		final Option envOption = Option.builder(this.cmdOptionEnv)
-									   .argName("environment")
-							           .hasArg()
-							           .required(false)
-							           .desc("server environment: (tst, sbx, prod)")
-							           .build();
+									   	.argName("env")
+									   	.hasArg()
+									   	.longOpt("env")
+									   	.desc("server environment: (tst, sbx, prod)")
+									   	.build();
 		
 		// Show Details Option
 		final Option useCacheOption = Option.builder(this.cmdUseCache)
-									   	 .argName("cache")
-									   	 .required(false)
-									   	 .desc("api queries will get from cache")
-									   	 .build();
-
+									   	 	.desc("api queries will get from cache")
+									   	 	.build();
+		
+		final Option helpOption = Option.builder(this.cmdHelp)
+										.longOpt("help")
+										.desc("How avilable option")
+										.build();
+		
 		options.addOption(filePathOption);
 		options.addOption(envOption);
 		options.addOption(useCacheOption);
+		options.addOption(helpOption);
+		
 	}
 
 	@Override
@@ -125,6 +133,11 @@ public class ReportToolRunner implements CommandLineRunner {
 		
 		try {
 			this.cmd = parser.parse(options, args);
+			
+			if (this.cmd.hasOption(this.cmdHelp)) {
+				formatter.printHelp("Vendor Api Tester", options);
+				System.exit(1);
+			}
 			
 			final boolean hasRequiredFields = this.initializeConfig();
 			
@@ -163,7 +176,7 @@ public class ReportToolRunner implements CommandLineRunner {
 				System.out.println("File not found.");
 			}
 		} catch (UnrecognizedOptionException | MissingArgumentException e) {
-			formatter.printHelp(Constants.EMPTY_STRING, options);
+			formatter.printHelp("Vendor API Tester", options);
 			System.exit(1);
 		}
 		

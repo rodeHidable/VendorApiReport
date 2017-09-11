@@ -35,11 +35,11 @@ public class AppConfig {
 		final StringBuilder strVal = new StringBuilder();
 		strVal.append("\n").append("Test File Path: ").append(this.testFilePath).append("\n");
 		strVal.append("Environment: ").append(this.environment).append("\n");
-		strVal.append("No-Cache: ");
+		strVal.append("Use cache: ");
 		if (this.skipCache) {
-			strVal.append("Yes");
-		} else {
 			strVal.append("No");
+		} else {
+			strVal.append("Yes");
 		}
 		return strVal.toString();
 	}
