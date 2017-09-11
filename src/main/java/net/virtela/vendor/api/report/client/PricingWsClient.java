@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import net.virtela.vendor.api.report.util.Constants;
@@ -42,11 +43,14 @@ public class PricingWsClient {
 		
 		final HttpEntity<String> request = new HttpEntity<>(param, headers);
 		
-		
-		logger.debug("calling pricing web service using this param: " + param + " and this env: " + endpoint);
-		final ResponseEntity<String> response = this.restTemplate.exchange(endpoint, HttpMethod.POST, request, String.class);
-		if (response.getStatusCode() == HttpStatus.OK) {
-			return response.getBody();
+		try {
+			logger.debug("calling pricing web service using this param: " + param + " and this env: " + endpoint);
+			final ResponseEntity<String> response = this.restTemplate.exchange(endpoint, HttpMethod.POST, request, String.class);
+			if (response.getStatusCode() == HttpStatus.OK) {
+				return response.getBody();
+			}
+		} catch (HttpClientErrorException e) {
+			return Constants.EMPTY_STRING;
 		}
 		
 		return Constants.EMPTY_STRING;
