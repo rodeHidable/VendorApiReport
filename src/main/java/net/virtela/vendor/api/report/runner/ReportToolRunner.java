@@ -86,57 +86,49 @@ public class ReportToolRunner implements CommandLineRunner {
 
 	@PostConstruct
 	public void init() {
-		
 		this.progres = new AtomicInteger(0);
 		this.totalWork = new AtomicInteger(0); 
 		this.progresBar = new CliProgressBar();
 		this.options = new Options();
 		this.appConf = new AppConfig();
 
-		// File Option
-		final Option filePathOption = Option.builder(this.cmdOptionFile)
-											.argName("path")
-											.longOpt("path")
-											.hasArg()
-											.desc("file path")
-											.build();
+		options.addOption(
+				Option.builder(this.cmdOptionFile)
+					  .argName("path")
+					  .longOpt("path")
+					  .hasArg()
+					  .desc("file path")
+					  .build());
 		
-		// Environment Option
-		final Option envOption = Option.builder(this.cmdOptionEnv)
-									   	.argName("env")
-									   	.hasArg()
-									   	.longOpt("env")
-									   	.desc("server environment: (tst, sbx, prod)")
-									   	.build();
+		options.addOption(
+				Option.builder(this.cmdOptionEnv)
+			   		  .argName("env")
+			   		  .hasArg()
+			   		  .longOpt("env")
+			   		  .desc("server environment: (tst, sbx, prod)")
+			   		  .build());
 		
-		// Show Details Option
-		final Option useCacheOption = Option.builder(this.cmdUseCache)
-									   	 	.desc("api queries will get from cache")
-									   	 	.build();
+		options.addOption(
+				Option.builder(this.cmdUseCache)
+		   	 		  .desc("api queries will get from cache")
+		   	 		  .build());
 		
-		final Option helpOption = Option.builder(this.cmdHelp)
-										.longOpt("help")
-										.desc("How avilable option")
-										.build();
-		
-		options.addOption(filePathOption);
-		options.addOption(envOption);
-		options.addOption(useCacheOption);
-		options.addOption(helpOption);
-		
+		options.addOption(
+				Option.builder(this.cmdHelp)
+					  .longOpt("help")
+					  .desc("How avilable option")
+					  .build());
 	}
 
 	@Override
 	public void run(String... args) throws Exception {
-		final HelpFormatter formatter = new HelpFormatter();
 		final CommandLineParser parser = new DefaultParser();
 		
 		try {
 			this.cmd = parser.parse(options, args);
 			
 			if (this.cmd.hasOption(this.cmdHelp)) {
-				formatter.printHelp("Vendor Api Tester", options);
-				System.exit(1);
+				this.showHelp();
 			}
 			
 			final boolean hasRequiredFields = this.initializeConfig();
@@ -176,10 +168,33 @@ public class ReportToolRunner implements CommandLineRunner {
 				System.out.println("File not found.");
 			}
 		} catch (UnrecognizedOptionException | MissingArgumentException e) {
-			formatter.printHelp("Vendor API Tester", options);
-			System.exit(1);
+			this.showHelp();
 		}
 		
+	}
+	
+	private void showHelp() {
+		final HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("Vendor Api Tester", options);
+		System.exit(1);
+	}
+	
+	private String generateReportFileName(String file) {
+		final String [] fileArr = file.split(Constants.SLASH);
+		final String date = new SimpleDateFormat("MMddyyyyhhmmssS").format(CommonHelper.getDateToday());
+		final String fileName = fileArr[fileArr.length -1].replace(Constants.DOT + Constants.FILE_TYPE_XLSX, Constants.EMPTY_STRING);
+
+		final String path = new File(".").getAbsolutePath();
+		
+		final StringBuilder reportFileName = new StringBuilder();
+		reportFileName.append(path.substring(0, path.length() - 1));
+		reportFileName.append(fileName);
+		reportFileName.append("Report");
+		reportFileName.append(date);
+		reportFileName.append(Constants.DOT);
+		reportFileName.append(Constants.FILE_TYPE_XLSX);
+		
+		return reportFileName.toString();
 	}
 	
 	private void initiateProgressBar(List<Address> addressList, List<ServiceRequest> serviceList) {
@@ -235,21 +250,12 @@ public class ReportToolRunner implements CommandLineRunner {
 
 	private String exportReport(String filePath) {
 		logger.debug("exporting report...");
-		final StringBuilder reportFile = new StringBuilder();
 		filePath = filePath.replace(Constants.BACK_SLASH, Constants.SLASH);
 		
 		final String [] fileArr = filePath.split(Constants.SLASH);
-		for (int i = 0; i < fileArr.length; i++) {
-			if (i == fileArr.length - 1) {
-				final String date = new SimpleDateFormat("MMM-dd-yyyy").format(CommonHelper.getDateToday());
-				reportFile.append("ApiReport-");
-				reportFile.append(date);
-				reportFile.append(".xlsx");
-				break;
-			}
-			reportFile.append(fileArr[i]);
-			reportFile.append(Constants.SLASH);
-		}
+		
+		final StringBuilder reportFile = new StringBuilder();
+		reportFile.append(this.generateReportFileName(fileArr[fileArr.length -1]));
 		
 		final ApiReportExporter reportExporter = new ApiReportExporter();
 		reportExporter.populateContent(this.reportList, this.vendorSet);
