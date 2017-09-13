@@ -79,6 +79,12 @@ public class ReportToolRunner implements CommandLineRunner {
 	@Value("${cmd.option.help}")
 	private String cmdHelp;
 	
+	@Value("${app.name}")
+	private String appName;
+	
+	@Value("${app.export.filename.suffix}")
+	private String exportFilenameSuffix;
+	
 	private AtomicInteger totalWork;
 	private AtomicInteger progres;
 	private CliProgressBar progresBar;
@@ -116,7 +122,7 @@ public class ReportToolRunner implements CommandLineRunner {
 		options.addOption(
 				Option.builder(this.cmdHelp)
 					  .longOpt("help")
-					  .desc("How avilable option")
+					  .desc("show available options")
 					  .build());
 	}
 
@@ -175,21 +181,22 @@ public class ReportToolRunner implements CommandLineRunner {
 	
 	private void showHelp() {
 		final HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("Vendor Api Tester", options);
+		formatter.printHelp(this.appName, options);
 		System.exit(1);
 	}
 	
 	private String generateReportFileName(String file) {
 		final String [] fileArr = file.split(Constants.SLASH);
-		final String date = new SimpleDateFormat("MMddyyyyhhmmssS").format(CommonHelper.getDateToday());
 		final String fileName = fileArr[fileArr.length -1].replace(Constants.DOT + Constants.FILE_TYPE_XLSX, Constants.EMPTY_STRING);
 
+		final String date = new SimpleDateFormat("MMddyyyyhhmmssS").format(CommonHelper.getDateToday());
+		
 		final String path = new File(".").getAbsolutePath();
 		
 		final StringBuilder reportFileName = new StringBuilder();
 		reportFileName.append(path.substring(0, path.length() - 1));
 		reportFileName.append(fileName);
-		reportFileName.append("Report");
+		reportFileName.append(this.exportFilenameSuffix);
 		reportFileName.append(date);
 		reportFileName.append(Constants.DOT);
 		reportFileName.append(Constants.FILE_TYPE_XLSX);
