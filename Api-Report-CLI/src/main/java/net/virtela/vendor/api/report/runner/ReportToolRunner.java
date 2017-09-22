@@ -133,7 +133,7 @@ public class ReportToolRunner implements CommandLineRunner {
 		try {
 			this.cmd = parser.parse(options, args);
 			
-			if (this.cmd.hasOption(this.cmdHelp)) {
+			if (this.cmd.hasOption(this.cmdHelp) || this.cmd.hasOption(this.cmdOptionFile) == false) {
 				this.showHelp();
 			}
 			
